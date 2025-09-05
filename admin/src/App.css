@@ -1,0 +1,78 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.sidebar {
+  width: 280px;
+  background: #2c3e50;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar h2 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #ecf0f1;
+}
+
+.hint {
+  font-size: 14px;
+  color: #bdc3c7;
+  margin-bottom: 20px;
+}
+
+.userList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.userItem {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 6px;
+}
+
+.userItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.userItem.active {
+  background: rgba(46, 204, 113, 0.2);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.name {
+  font-weight: bold;
+  color: #ecf0f1;
+}
+
+.small {
+  font-size: 12px;
+  color: #95a5a6;
+}
+
+.id {
+  margin-left: auto;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.map {
+  flex: 1;
+}

@@ -1,0 +1,132 @@
+
+.user-layout {
+  font-family: 'Roboto', sans-serif;
+  background: #f7f9fc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
+
+.title {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-family: 'Satisfy', cursive;
+}
+
+.form {
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.sharing{
+  display: flex;
+  flex-direction: column;
+}
+.status {
+  color: #2ecc71;
+  font-weight: 500;
+  font-family: 'Satisfy', cursive;
+}
+
+.btn.logout {
+  width: 120px;
+  padding: 12px;
+  margin-top: 12px;
+  background: #2c3e50;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: 0.3s ease-in;
+}
+.btn.logout:hover {
+  background: rgb(179, 160, 77);
+}
+
+.btn.stop {
+  width: 200px;
+  padding: 12px;
+  margin-top: 12px;
+  background: rgb(179, 160, 77);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: 0.3s ease-in;
+}
+
+.btn.stop:hover {
+  background: #1976d2;
+}
+
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 500;
+  color: #34495e;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border 0.2s;
+}
+
+.input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn.start {
+  background: #2ecc71;
+  color: white;
+}
+
+.btn.start:hover {
+  background: #27ae60;
+}
+
+.btn.stop {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn.stop:hover {
+  background: #c0392b;
+}
+
+.sharing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.status {
+  color: #2ecc71;
+  font-weight: 500;
+}
