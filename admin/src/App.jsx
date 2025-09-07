@@ -389,10 +389,13 @@ export default function App() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <h2>👥 Utilisateurs</h2>
+        <div style={{ fontFamily: "'Reey', cursive", fontSize: 25, marginBottom: 15 }}>
+        Technoweb
+      </div>
+        <h2><i className="fas fa-users"></i> Utilisateurs</h2>
         <p className="hint">Clique un nom pour suivre sa position en direct.</p>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 8 }} className="top-bar">
           <button
             onClick={() => {
               setSelectedId(null);
@@ -401,7 +404,7 @@ export default function App() {
                 markerRef.current = null;
               }
             }}
-            style={{ padding: "6px 10px" }}
+            className="deselect-button"
           >
             Désélectionner
           </button>
@@ -418,7 +421,7 @@ export default function App() {
 
         <button
           onClick={() => signOut(auth)}
-          style={{ marginBottom: 12, padding: "6px 10px", background: "#e74c3c", color: "white" }}
+          className="logout-button"
         >
           Déconnexion
         </button>
@@ -443,7 +446,7 @@ export default function App() {
                   <span className="name">{u.name}</span>
                   <span className="small">{ts ? formatAgo(ts) : "pas de position"}</span>
                 </div>
-                <span className="id">{"Employee"}</span>
+                {/* <span className="id">{"Employee"}</span> */}
               </li>
             );
           })}
