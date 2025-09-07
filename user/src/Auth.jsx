@@ -26,7 +26,7 @@ export default function Auth({ onLogin }) {
       setMessage("Connexion réussie !");
       onLogin(userCred.user); // on remonte l’utilisateur connecté
     } catch (err) {
-      setMessage("Erreur : " + err.message);
+      setMessage("Mot de passe ou email incorrect.");
     }
   };
 
