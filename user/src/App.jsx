@@ -118,23 +118,25 @@ export default function App() {
     </div>
   );
 }*/
-// user/src/App.jsx
+
+
+/*
 // user/src/App.jsx
 import { useEffect, useRef, useState } from "react";
 import { db, auth } from "./firebase";
 import { ref, set, update } from "firebase/database";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import Auth from "./Auth";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./App.css";
+import Auth from "./Auth";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [sharing, setSharing] = useState(false);
   const mapRef = useRef(null);
-  const markerRef = useRef(null);
   const mapContainer = useRef(null);
+  const markerRef = useRef(null);
   const watchIdRef = useRef(null);
 
   // Auth
@@ -145,54 +147,47 @@ export default function App() {
 
   // Init map
   useEffect(() => {
-    if (!user) return;
-
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: "raster",
-            tiles: [
-              "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            ],
-            tileSize: 256,
-            attribution: '© OpenStreetMap contributors',
+    if (user && !mapRef.current) {
+      const map = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: "raster",
+              tiles: [
+                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              ],
+              tileSize: 256,
+              attribution: '© OpenStreetMap contributors',
+            },
           },
+          layers: [{ id: "osm", type: "raster", source: "osm" }],
         },
-        layers: [{ id: "osm", type: "raster", source: "osm" }],
-      },
-      center: [0, 0],
-      zoom: 2,
-    });
-
-    mapRef.current = map;
-
-    return () => map.remove();
+        center: [2.3522, 48.8566],
+        zoom: 12,
+      });
+      mapRef.current = map;
+    }
   }, [user]);
 
-  // Mise à jour du marqueur et centrage fluide
+  // Fonction pour mettre à jour le marqueur et recentrer la carte
   const updateMarker = (lat, lng) => {
     if (!mapRef.current) return;
-
     const lngLat = [lng, lat];
-
     if (!markerRef.current) {
-      markerRef.current = new maplibregl.Marker({ color: "blue" })
+      markerRef.current = new maplibregl.Marker({ color: "#2ecc71" })
         .setLngLat(lngLat)
         .addTo(mapRef.current);
     } else {
       markerRef.current.setLngLat(lngLat);
     }
-
-    // Fly to the new location
-    mapRef.current.flyTo({ center: lngLat, zoom: 15, speed: 1.2 });
+    mapRef.current.flyTo({ center: lngLat, zoom: 13 });
   };
 
-  // Start sharing
+  // Démarrer le partage
   const startSharing = async () => {
     if (!user) return;
 
@@ -206,11 +201,16 @@ export default function App() {
       return;
     }
 
+    const options = {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 0,
+    };
+
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
+        const { latitude, longitude } = pos.coords;
 
-        // update DB
         update(ref(db, `locations/${user.uid}`), {
           lat: latitude,
           lng: longitude,
@@ -222,29 +222,26 @@ export default function App() {
           lastSeen: Date.now(),
         });
 
-        // update marker
         updateMarker(latitude, longitude);
       },
       (err) => {
-        console.error("Erreur GPS", err);
+        console.error("Erreur lors de la localisation :", err);
         alert("Erreur lors de la localisation : " + err.message);
       },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 1000,
-        timeout: 15000,
-      }
+      options
     );
 
     watchIdRef.current = id;
     setSharing(true);
   };
 
+  // Stopper le partage
   const stopSharing = () => {
     if (watchIdRef.current != null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+
     setSharing(false);
 
     if (user) {
@@ -261,10 +258,8 @@ export default function App() {
     <div className="user-layout">
       <h3 className="title">👋 Bienvenue, {user.email}</h3>
 
-      {/* Carte utilisateur */}
-      <div ref={mapContainer} style={{ height: "75vh", width: "100%" }} className="map" />
+      <div ref={mapContainer} className="map" />
 
-      {/* Contrôles */}
       <div className="controls">
         {!sharing ? (
           <button className="btn start" onClick={startSharing}>
@@ -275,7 +270,177 @@ export default function App() {
             <button className="btn stop" onClick={stopSharing}>
               Stopper le partage
             </button>
-            <span className="status">Partage actif !</span>
+            <span className="status">Votre partage est actif !</span>
+          </div>
+        )}
+
+        <button className="btn logout" onClick={() => signOut(auth)}>
+          Déconnexion
+        </button>
+      </div>
+    </div>
+  );
+}*/
+
+import { useEffect, useRef, useState } from "react";
+import { db, auth } from "./firebase";
+import { ref, set, update } from "firebase/database";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
+import "./App.css";
+import Auth from "./Auth";
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [sharing, setSharing] = useState(false);
+  const mapRef = useRef(null);
+  const mapContainer = useRef(null);
+  const markerRef = useRef(null);
+  const watchIdRef = useRef(null);
+
+  // Auth
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  // Init carte dès que l'utilisateur est là
+  useEffect(() => {
+    if (!mapRef.current && user) {
+      const map = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            osm: {
+              type: "raster",
+              tiles: [
+                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              ],
+              tileSize: 256,
+              attribution: '© OpenStreetMap contributors',
+            },
+          },
+          layers: [{ id: "osm", type: "raster", source: "osm" }],
+        },
+        center: [2.3522, 48.8566], // Centre par défaut : Paris
+        zoom: 13,
+      });
+
+      mapRef.current = map;
+    }
+  }, [user]);
+
+  // Fonction pour mettre ou déplacer le marqueur
+  const updateMarker = (lat, lng) => {
+    if (!mapRef.current) return;
+    const lngLat = [lng, lat];
+
+    if (!markerRef.current) {
+      markerRef.current = new maplibregl.Marker({ color: "#2ecc71" })
+        .setLngLat(lngLat)
+        .addTo(mapRef.current);
+    } else {
+      markerRef.current.setLngLat(lngLat);
+    }
+
+    mapRef.current.flyTo({ center: lngLat, zoom: 15 });
+  };
+
+  // Démarrer le partage de position
+  const startSharing = async () => {
+    if (!user) return;
+
+    await set(ref(db, `users/${user.uid}`), {
+      name: user.email,
+      createdAt: Date.now(),
+    });
+
+    if (!("geolocation" in navigator)) {
+      alert("Votre navigateur ne supporte pas la géolocalisation.");
+      return;
+    }
+
+    let firstUpdate = true;
+
+    const options = {
+      enableHighAccuracy: true, // demande le GPS si dispo
+      timeout: 15000,           // attend max 15s
+      maximumAge: 10000,        // accepte une position de 10s max
+    };
+
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+
+        update(ref(db, `locations/${user.uid}`), {
+          lat: latitude,
+          lng: longitude,
+          ts: Date.now(),
+        });
+
+        update(ref(db, `presence/${user.uid}`), {
+          online: true,
+          lastSeen: Date.now(),
+        });
+
+        if (firstUpdate) {
+          updateMarker(latitude, longitude); // on centre la carte la première fois
+          firstUpdate = false;
+        } else {
+          markerRef.current?.setLngLat([longitude, latitude]);
+        }
+      },
+      (err) => {
+        console.error("Erreur de géolocalisation :", err);
+        alert("Erreur lors de la localisation : " + err.message);
+      },
+      options
+    );
+
+    watchIdRef.current = id;
+    setSharing(true);
+  };
+
+  // Stopper le partage
+  const stopSharing = () => {
+    if (watchIdRef.current != null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
+    setSharing(false);
+
+    if (user) {
+      update(ref(db, `presence/${user.uid}`), {
+        online: false,
+        lastSeen: Date.now(),
+      }).catch(() => {});
+    }
+  };
+
+  if (!user) return <Auth onLogin={(u) => setUser(u)} />;
+
+  return (
+    <div className="user-layout">
+      <h3 className="title">👋 Bienvenue, {user.email}</h3>
+
+      <div ref={mapContainer} className="map" />
+
+      <div className="controls">
+        {!sharing ? (
+          <button className="btn start" onClick={startSharing}>
+            Démarrer le partage
+          </button>
+        ) : (
+          <div className="sharing">
+            <button className="btn stop" onClick={stopSharing}>
+              Stopper le partage
+            </button>
+            <span className="status">Votre partage est actif !</span>
           </div>
         )}
 
@@ -286,3 +451,5 @@ export default function App() {
     </div>
   );
 }
+
+
