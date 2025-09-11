@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.7",
     "@heroicons/react": "^2.2.0",
+    "@turf/turf": "^7.2.0",
     "firebase": "^12.2.1",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^5.7.0",

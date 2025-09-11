@@ -105,3 +105,105 @@
 .deselect-button:hover {
   color: white;
 }
+
+/* Commune actuelle affichée à côté du user */
+.communeTag {
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: auto;
+}
+
+/* Notifications bloc */
+.notifications {
+  margin-top: 15px;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+  font-size: 13px;
+}
+
+.notifications h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.notifItem {
+  padding: 6px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.notifItem .time {
+  font-size: 11px;
+  color: #777;
+}
+
+.follow-toggle {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+/* Notifications */
+.notifications {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  max-height: auto;
+  
+}
+
+.notifItem {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  position: relative;
+  color: rgb(41, 41, 100);
+}
+
+.notifItem .time {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.clear-all-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 0.9em;
+  border-radius: 4px;
+}
+
+.clear-all-btn:hover {
+  background-color: #c0392b;
+}
+
+.notifContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-notif-btn {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 1.2em;
+  margin-left: 8px;
+}
+
+.brand {
+  font-family: 'Reey', cursive;
+  font-size: 25px;
+  margin-bottom: 15px;
+}
