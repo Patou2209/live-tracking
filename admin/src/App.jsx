@@ -359,15 +359,15 @@ export default function App() {
   );
 }*/
 
+// Avec la notification persistante
+
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./App.css";
-
 import * as turf from "@turf/turf";
-
 import { db, auth } from "./firebase";
-import { ref, onValue, off } from "firebase/database";
+import { ref, onValue, off, push, remove } from "firebase/database";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import Auth from "./Auth";
 
@@ -388,17 +388,17 @@ export default function App() {
   const markerRef = useRef(null);
   const currentLocRef = useRef(null);
   const animationRef = useRef(null);
-
   const pathRef = useRef([]);
 
+  // Auth
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
 
+  // Initialiser la carte
   useEffect(() => {
     if (!user) return;
-
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: {
@@ -418,10 +418,9 @@ export default function App() {
         },
         layers: [{ id: "osm", type: "raster", source: "osm" }],
       },
-      center: [15.2663, -4.4419],
+      center: [15.2663, -4.4419], // Kinshasa
       zoom: 12,
     });
-
     mapRef.current = map;
 
     map.on("load", async () => {
@@ -431,28 +430,18 @@ export default function App() {
         setCommunesData(communes);
 
         map.addSource("communes", { type: "geojson", data: communes });
-
         map.addLayer({
           id: "communes-fill",
           type: "fill",
           source: "communes",
-          paint: {
-            "fill-color": "#4CAF50",
-            "fill-opacity": 0.05,
-          },
+          paint: { "fill-color": "#4CAF50", "fill-opacity": 0.05 },
         });
-
         map.addLayer({
           id: "communes-outline",
           type: "line",
           source: "communes",
-          paint: {
-            "line-color": "#aaa",
-            "line-width": 1,
-          },
+          paint: { "line-color": "#aaa", "line-width": 1 },
         });
-
-        console.log("Communes chargées !");
       } catch (err) {
         console.error("Erreur chargement communes.geojson", err);
       }
@@ -461,6 +450,7 @@ export default function App() {
     return () => map.remove();
   }, [user]);
 
+  // Charger les utilisateurs
   useEffect(() => {
     if (!user) return;
     const usersRef = ref(db, "users");
@@ -476,22 +466,36 @@ export default function App() {
     return () => off(usersRef);
   }, [user]);
 
+  // Charger les positions
   useEffect(() => {
     if (!user) return;
     const locRef = ref(db, "locations");
-    const cb = (snap) => {
-      const val = snap.val() || {};
-      setLocationsMap(val);
-    };
+    const cb = (snap) => setLocationsMap(snap.val() || {});
     onValue(locRef, cb);
     return () => off(locRef);
   }, [user]);
 
+  // Charger les notifications persistées
+  useEffect(() => {
+    if (!user) return;
+    const notifRef = ref(db, "notifications");
+    const cb = (snap) => {
+      const val = snap.val() || {};
+      const list = Object.entries(val).map(([id, n]) => ({
+        id,
+        ...n,
+      }));
+      setNotifications(list.sort((a, b) => b.ts - a.ts));
+    };
+    onValue(notifRef, cb);
+    return () => off(notifRef);
+  }, [user]);
+
+  // Animation du marqueur
   const animateMarkerTo = (startLngLat, endLngLat, duration = 1000) => {
     const marker = markerRef.current;
     if (!marker) return;
     const startTime = performance.now();
-
     const animate = (time) => {
       const t = Math.min((time - startTime) / duration, 1);
       const lng = startLngLat[0] + (endLngLat[0] - startLngLat[0]) * t;
@@ -499,22 +503,25 @@ export default function App() {
       marker.setLngLat([lng, lat]);
       if (t < 1) animationRef.current = requestAnimationFrame(animate);
     };
-
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     animationRef.current = requestAnimationFrame(animate);
   };
 
+  // Trouver commune
   const findCommune = (lngLat) => {
     if (!communesData) return null;
     const pt = turf.point(lngLat);
     for (const feat of communesData.features) {
       if (turf.booleanPointInPolygon(pt, feat)) {
-        return feat.properties?.name || feat.properties?.NAME || "Commune inconnue";
+        return (
+          feat.properties?.name || feat.properties?.NAME || "Commune inconnue"
+        );
       }
     }
     return null;
   };
 
+  // Suivi utilisateur
   useEffect(() => {
     if (!user) return;
 
@@ -527,11 +534,11 @@ export default function App() {
       markerRef.current = null;
     }
     pathRef.current = [];
+
     if (mapRef.current?.getSource("path")) {
       mapRef.current.removeLayer("path-line");
       mapRef.current.removeSource("path");
     }
-
     if (!selectedId) return;
 
     const locRef = ref(db, `locations/${selectedId}`);
@@ -543,15 +550,20 @@ export default function App() {
 
       const newLngLat = [pos.lng, pos.lat];
 
+      // Marker
       if (!markerRef.current) {
         markerRef.current = new maplibregl.Marker({ color: "red" })
           .setLngLat(newLngLat)
           .addTo(mapRef.current);
       } else {
         const currentLngLat = markerRef.current.getLngLat();
-        animateMarkerTo([currentLngLat.lng, currentLngLat.lat], newLngLat);
+        animateMarkerTo(
+          [currentLngLat.lng, currentLngLat.lat],
+          newLngLat
+        );
       }
 
+      // Path
       pathRef.current.push(newLngLat);
       if (!mapRef.current.getSource("path")) {
         mapRef.current.addSource("path", {
@@ -565,10 +577,7 @@ export default function App() {
           id: "path-line",
           type: "line",
           source: "path",
-          paint: {
-            "line-color": "#1976d2",
-            "line-width": 3,
-          },
+          paint: { "line-color": "#1976d2", "line-width": 3 },
         });
       } else {
         mapRef.current.getSource("path").setData({
@@ -581,14 +590,16 @@ export default function App() {
         mapRef.current.flyTo({ center: newLngLat, zoom: 15 });
       }
 
+      // Détection commune
       const found = findCommune(newLngLat);
       setCurrentCommunes((prev) => {
         const previous = prev[selectedId];
         if (found && found !== previous) {
-          setNotifications((notif) => [
-            { ts: Date.now(), text: `Utilisateur ${selectedId} → ${found}` },
-            ...notif,
-          ]);
+          const newNotif = {
+            ts: Date.now(),
+            text: `Utilisateur ${selectedId} est entré dans la commune ${found}`,
+          };
+          push(ref(db, "notifications"), newNotif);
           return { ...prev, [selectedId]: found };
         }
         return prev;
@@ -596,7 +607,6 @@ export default function App() {
     };
 
     onValue(locRef, cb);
-
     return () => {
       off(locRef);
       if (markerRef.current) markerRef.current.remove();
@@ -608,6 +618,7 @@ export default function App() {
     };
   }, [user, selectedId, following, communesData]);
 
+  // Helpers
   const formatAgo = (ts) => {
     if (!ts) return "—";
     const d = Math.floor((Date.now() - ts) / 1000);
@@ -615,12 +626,9 @@ export default function App() {
     if (d < 3600) return `${Math.floor(d / 60)}m`;
     return `${Math.floor(d / 3600)}h`;
   };
-
   const isOnline = (ts) => ts && Date.now() - ts < 2 * 60 * 1000;
 
-  if (!user) {
-    return <Auth onLogin={(u) => setUser(u)} />;
-  }
+  if (!user) return <Auth onLogin={(u) => setUser(u)} />;
 
   return (
     <div className="layout">
@@ -647,7 +655,6 @@ export default function App() {
           >
             Désélectionner
           </button>
-
           <label className="follow-toggle">
             <input
               type="checkbox"
@@ -678,8 +685,11 @@ export default function App() {
                   style={{ background: isOnline(ts) ? "#27ae60" : "#bbb" }}
                 />
                 <div>
-                  <span className="name">{u.name}</span> <br />
-                  <span className="small">{ts ? formatAgo(ts) : "pas de position"}</span>
+                  <span className="name">{u.name}</span>
+                  <br />
+                  <span className="small">
+                    {ts ? formatAgo(ts) : "pas de position"}
+                  </span>
                 </div>
                 {selectedId === u.id && currentCommunes[u.id] && (
                   <span className="communeTag">{currentCommunes[u.id]}</span>
@@ -692,19 +702,22 @@ export default function App() {
         <div className="notifications">
           <h3>Notifications</h3>
           {notifications.length > 0 && (
-            <button className="clear-all-btn" onClick={() => setNotifications([])}>
+            <button
+              className="clear-all-btn"
+              onClick={() => remove(ref(db, "notifications"))}
+            >
               Tout supprimer
             </button>
           )}
-          {notifications.length === 0 && <div className="empty">Aucune notification</div>}
-          {notifications.map((n, i) => (
-            <div key={i} className="notifItem">
+          {notifications.length === 0 && (
+            <div className="empty">Aucune notification</div>
+          )}
+          {notifications.map((n) => (
+            <div key={n.id} className="notifItem">
               <div className="notifContent">
                 <span>{n.text}</span>
                 <button
-                  onClick={() =>
-                    setNotifications((prev) => prev.filter((_, idx) => idx !== i))
-                  }
+                  onClick={() => remove(ref(db, "notifications/" + n.id))}
                   className="delete-notif-btn"
                   title="Supprimer"
                 >
