@@ -1,5 +1,5 @@
 // admin/src/App.jsx
-/*import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./App.css";
@@ -357,100 +357,5 @@ export default function App() {
       <div ref={mapContainer} className="map" />
     </div>
   );
-}*/
-
-// Avec la notification persistante
-// admin/src/App.jsx
-import { useEffect, useRef, useState } from "react";
-import maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import "./App.css";
-
-import { db } from "./firebase";
-import { ref, onValue, off } from "firebase/database";
-
-export default function App() {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const [users, setUsers] = useState([]);
-  const [presenceMap, setPresenceMap] = useState({});
-  const markers = useRef({});
-
-  // Init map
-  useEffect(() => {
-    if (map.current) return;
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: "https://demotiles.maplibre.org/style.json",
-      center: [0, 0],
-      zoom: 2,
-    });
-  }, []);
-
-  // Charge les positions
-  useEffect(() => {
-    const locRef = ref(db, "locations");
-    const cb = (snap) => {
-      const data = snap.val() || {};
-      const arr = Object.keys(data).map((uid) => ({
-        id: uid,
-        ...data[uid],
-      }));
-      setUsers(arr);
-    };
-    onValue(locRef, cb);
-    return () => off(locRef, cb);
-  }, []);
-
-  // Charge la présence
-  useEffect(() => {
-    const presRef = ref(db, "presence");
-    const cb = (snap) => setPresenceMap(snap.val() || {});
-    onValue(presRef, cb);
-    return () => off(presRef, cb);
-  }, []);
-
-  // Affiche les marqueurs
-  useEffect(() => {
-    if (!map.current) return;
-    users.forEach((u) => {
-      const id = u.id;
-      if (!markers.current[id]) {
-        const el = document.createElement("div");
-        el.className = "marker";
-        markers.current[id] = new maplibregl.Marker(el)
-          .setLngLat([u.lng, u.lat])
-          .addTo(map.current);
-      } else {
-        markers.current[id].setLngLat([u.lng, u.lat]);
-      }
-    });
-  }, [users]);
-
-  return (
-    <div className="app">
-      <div className="sidebar">
-        <h2>Utilisateurs en temps réel</h2>
-        <ul>
-          {users.map((u) => {
-            const pres = presenceMap[u.id];
-            const online = pres?.online === true;
-            return (
-              <li key={u.id}>
-                <span
-                  className="dot"
-                  style={{ background: online ? "#27ae60" : "#bbb" }}
-                />
-                {u.id} <br />
-                <small>
-                  {u.lat.toFixed(4)}, {u.lng.toFixed(4)}
-                </small>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <div className="map-wrap" ref={mapContainer}></div>
-    </div>
-  );
 }
+
