@@ -293,7 +293,7 @@ export default function App() {
   );
 } */
 
-  // App.jsx
+  //user/ App.jsx
 import { useEffect, useRef, useState } from "react";
 import { db, auth } from "./firebase";
 import { ref, set, update } from "firebase/database";
