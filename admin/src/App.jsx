@@ -1,4 +1,5 @@
-// admin/src/App.jsx
+
+
 import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -196,7 +197,16 @@ export default function App() {
 
       // Marker
       if (!markerRef.current) {
-        markerRef.current = new maplibregl.Marker({ color: "red" })
+        // Marqueur personnalisé style Google Maps
+        const el = document.createElement('div');
+        el.style.background = 'none';
+        el.style.width = '40px';
+        el.style.height = '40px';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+        el.innerHTML = `<img src="https://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2_hdpi.png" style="width:32px;height:32px;" alt="marker" />`;
+        markerRef.current = new maplibregl.Marker(el)
           .setLngLat(newLngLat)
           .addTo(mapRef.current);
       } else {
@@ -236,11 +246,18 @@ export default function App() {
 
       // Détection commune
       const found = findCommune(newLngLat);
-      if (found && found !== currentCommune) {
-        setNotifications((prev) => [
-          { ts: Date.now(), text: `Utilisateur ${selectedId} → ${found}` },
-          ...prev,
-        ]);
+      if (found !== currentCommune) {
+        if (found) {
+          setNotifications((prev) => [
+            { ts: Date.now(), text: `Utilisateur ${selectedId} est entré dans ${found}` },
+            ...prev,
+          ]);
+        } else if (currentCommune) {
+          setNotifications((prev) => [
+            { ts: Date.now(), text: `Utilisateur ${selectedId} a quitté ${currentCommune}` },
+            ...prev,
+          ]);
+        }
         setCurrentCommune(found);
       }
     };
@@ -344,10 +361,14 @@ export default function App() {
         
         <div className="notifications">
           <h3>Notifications</h3>
+          <button onClick={() => setNotifications([])} style={{marginBottom:8, padding:'2px 8px', fontSize:12}}>Tout effacer</button>
           {notifications.length === 0 && <div className="empty">Aucune notification</div>}
           {notifications.map((n, i) => (
-            <div key={i} className="notifItem">
-              <div>{n.text}</div>
+            <div key={i} className="notifItem" style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+              <div>
+                {n.text}
+                <span style={{marginLeft:8, cursor:'pointer', color:'#e74c3c', fontWeight:'bold'}} onClick={() => setNotifications(notifications.filter((_, idx) => idx !== i))}>✖</span>
+              </div>
               <div className="time">{new Date(n.ts).toLocaleString()}</div>
             </div>
           ))}
@@ -358,4 +379,3 @@ export default function App() {
     </div>
   );
 }
-
